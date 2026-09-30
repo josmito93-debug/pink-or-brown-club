@@ -1,0 +1,17 @@
+{
+  "name": "pink-or-brown-club",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Pink or Brown · Club — Web App & Community",
+  "scripts": {
+    "start": "npx serve ."
+  },
+  "keywords": [
+    "pink-or-brown",
+    "club",
+    "breast-cancer-awareness",
+    "community",
+    "merch",
+    "gsap"
+  ]
+}
