@@ -87,32 +87,65 @@ window.POB_BACKEND = {
   // --- REALTIME CHAT MESSAGES ---
   subscribeMessages(userId, onMessage) {
     if (!sb) return () => {};
-    const channel = sb
-      .channel('chat-messages')
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'messages',
-          filter: `recipient_id=eq.${userId}`
-        },
-        payload => onMessage(payload.new)
-      )
-      .subscribe();
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (!isUuid.test(userId)) return () => {};
 
-    return () => {
-      sb.removeChannel(channel);
-    };
+    if (window._sbChatChannel) {
+      try { sb.removeChannel(window._sbChatChannel); } catch(e) {}
+      window._sbChatChannel = null;
+    }
+
+    try {
+      const channelName = 'chat-' + userId + '-' + Math.random().toString(36).slice(2, 7);
+      const channel = sb.channel(channelName);
+      channel
+        .on(
+          'postgres_changes',
+          {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'messages',
+            filter: `recipient_id=eq.${userId}`
+          },
+          payload => {
+            if (payload && payload.new) onMessage(payload.new);
+          }
+        )
+        .subscribe();
+
+      window._sbChatChannel = channel;
+      return () => {
+        if (window._sbChatChannel === channel) {
+          try { sb.removeChannel(channel); } catch(e) {}
+          window._sbChatChannel = null;
+        }
+      };
+    } catch(err) {
+      console.warn('Realtime subscription notice:', err.message);
+      return () => {};
+    }
   },
 
   async sendMessage(senderId, recipientId, text) {
-    if (!sb) return;
-    const { data, error } = await sb
-      .from('messages')
-      .insert({ sender_id: senderId, recipient_id: recipientId, text });
-    if (error) throw error;
-    return data;
+    if (!sb) return null;
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (!isUuid.test(senderId) || !isUuid.test(recipientId)) {
+      // Local/demo member message, handled in frontend state
+      return null;
+    }
+    try {
+      const { data, error } = await sb
+        .from('messages')
+        .insert({ sender_id: senderId, recipient_id: recipientId, text });
+      if (error) {
+        console.warn('Supabase sendMessage notice:', error.message);
+        return null;
+      }
+      return data;
+    } catch(err) {
+      console.warn('Supabase sendMessage network notice:', err.message);
+      return null;
+    }
   },
 
   // --- REWARDS & REDEMPTION ---
