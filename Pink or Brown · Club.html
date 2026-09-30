@@ -1894,6 +1894,9 @@ function openChatWith(id){ activeChat = id; location.hash = '#/messages'; if(loc
 function sendMsg(u, to, text){
   u.chats[to] = u.chats[to] || {msgs:[], unread:false};
   u.chats[to].msgs.push({from:u.id, text, at:Date.now()}); saveMe(u);
+  if(window.POB_BACKEND?.isLive()){
+    window.POB_BACKEND.sendMessage(u.id, to, text).catch(err => console.warn('Supabase msg error:', err));
+  }
   const peer = users().find(x => x.id === to);
   if(peer){ ensureChats(peer); peer.chats[u.id] = peer.chats[u.id] || {msgs:[], unread:false}; peer.chats[u.id].msgs.push({from:u.id, text, at:Date.now()}); peer.chats[u.id].unread = true;
     const list = users(); list[list.findIndex(x => x.id === peer.id)] = peer; saveUsers(list); }
@@ -1910,8 +1913,18 @@ function sendMsg(u, to, text){
 function viewMessages(v, u){
   ensureChats(u);
   if(activeChat && !u.chats[activeChat]){ u.chats[activeChat] = {msgs:[], unread:false}; saveMe(u); }
+  if(window.POB_BACKEND?.isLive() && !u._subscribed){
+    u._subscribed = true;
+    window.POB_BACKEND.subscribeMessages(u.id, msg => {
+      u.chats[msg.sender_id] = u.chats[msg.sender_id] || {msgs:[], unread:false};
+      u.chats[msg.sender_id].msgs.push({from:msg.sender_id, text:msg.text, at:new Date(msg.created_at).getTime()});
+      u.chats[msg.sender_id].unread = activeChat !== msg.sender_id;
+      saveMe(u);
+      if(location.hash.includes('messages')) drawChat(); else toast('New message from ' + (member(msg.sender_id)?.name || 'Member'));
+    });
+  }
   v.innerHTML = clubNav('messages') + `<div class="sec-h"><h1 style="font-size:clamp(2rem,4vw,2.8rem)">Messages</h1><p>Members only · be kind, keep it respectful</p></div><div class="chat" id="chat"></div>
-    <p class="demo" style="margin-top:10px">Demo members reply automatically. In production messages are live between real members (Supabase Realtime), with report and block.</p>`;
+    <p class="hint" style="margin-top:10px">Encrypted direct messaging · Keep it respectful and fun · 18+ only</p>`;
   bindClubNav();
   drawChat();
 }
