@@ -6,6 +6,10 @@
   "scripts": {
     "start": "npx serve ."
   },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.49.1",
+    "stripe": "^17.7.0"
+  },
   "keywords": [
     "pink-or-brown",
     "club",
