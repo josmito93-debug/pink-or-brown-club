@@ -1420,6 +1420,22 @@ function viewLogin(v){
   $('#f').onsubmit = async e => {
     e.preventDefault();
     const em = $('#em').value.trim().toLowerCase(), pw = $('#pw').value;
+    if(window.POB_BACKEND?.isLive()){
+      try {
+        const res = await window.POB_BACKEND.signIn({ email: em, password: pw });
+        if(res && res.user){
+          let u = users().find(x => x.id === res.user.id || x.email === em);
+          if(!u){
+            u = newUser({id: res.user.id, name: res.user.user_metadata?.name || 'Member', handle: res.user.user_metadata?.handle || 'member', email: em, team: res.user.user_metadata?.team || 'pink', dob: res.user.user_metadata?.dob || '2000-01-01', lifetime: 100, balance: 100});
+            const list = users(); list.push(u); saveUsers(list);
+          }
+          store.set('session', {uid:u.id, at:Date.now()});
+          toast('Logged in with Supabase'); afterAuth(); return;
+        }
+      } catch(err){
+        console.warn('Supabase auth notice:', err.message);
+      }
+    }
     const u = users().find(x => x.email === em);
     if(!u || u.pass !== await hash(pw, u.salt)){ $('#e').innerHTML = `<div class="err">That email and password don't match. Check both and try again.</div>`; return; }
     store.set('session', {uid:u.id, at:Date.now()});
@@ -1480,6 +1496,13 @@ function viewRegister(v){
     if(!dob || ageOf(dob) < 18) errs.push('You must be 18 or older to join.');
     if(!$('#tos').checked) errs.push('Accept the terms to continue.');
     if(errs.length){ $('#e').innerHTML = `<div class="err">${errs.map(esc).join('<br>')}</div>`; $('#e').scrollIntoView({block:'center'}); return; }
+    if(window.POB_BACKEND?.isLive()){
+      try {
+        await window.POB_BACKEND.signUp({ email, password, name, handle, team, dob, referral: ref });
+      } catch(err){
+        console.warn('Supabase signup notice:', err.message);
+      }
+    }
     const salt = uid() + uid();
     const u = newUser({name, handle, email, team, dob, salt, pass:await hash(pw, salt)});
     award(u, 'signup');

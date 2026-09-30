@@ -6,18 +6,18 @@
 // ==============================================================================
 
 window.POB_CONFIG = {
-  supabaseUrl: window.ENV_SUPABASE_URL || 'https://YOUR_PROJECT_REF.supabase.co',
-  supabaseAnonKey: window.ENV_SUPABASE_ANON_KEY || 'YOUR_SUPABASE_ANON_KEY',
-  stripePublishableKey: window.ENV_STRIPE_PK || 'pk_live_YOUR_KEY'
+  supabaseUrl: 'https://jijehgxugiouatsbvxuh.supabase.co',
+  supabaseAnonKey: 'sb_publishable_QHSxi5-qS47exiKlLG9Lig_bL2p4fYt',
+  stripePublishableKey: window.ENV_STRIPE_PK || ''
 };
 
 // Initialize Supabase Client
 let sb = null;
-if (window.supabase && window.POB_CONFIG.supabaseUrl && !window.POB_CONFIG.supabaseUrl.includes('YOUR_PROJECT_REF')) {
+if (window.supabase && window.POB_CONFIG.supabaseUrl) {
   sb = window.supabase.createClient(window.POB_CONFIG.supabaseUrl, window.POB_CONFIG.supabaseAnonKey);
-  console.log('✓ Connected to Supabase Production');
+  console.log('✓ Connected to Supabase Production (jijehgxugiouatsbvxuh)');
 } else {
-  console.log('ℹ Running with local store bridge (paste Supabase credentials in js/supabase-client.js for live backend)');
+  console.log('ℹ Running with local store bridge');
 }
 
 window.POB_BACKEND = {
