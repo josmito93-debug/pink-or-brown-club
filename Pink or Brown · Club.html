@@ -585,6 +585,31 @@ dialog.auth-modal::backdrop{background:rgba(29,19,16,.6);backdrop-filter:blur(6p
 .chat-sticker-visual svg{max-height:80px;width:auto}
 .msg.has-sticker{background:none!important;padding:4px!important;border:none!important}
 
+
+/* ===== Page Loader & Official Transparent Logos ===== */
+.page-loader{position:fixed;inset:0;background:var(--bg);z-index:99999;display:flex;align-items:center;justify-content:center;transition:opacity .5s cubic-bezier(.4,0,.2,1), visibility .5s}
+.page-loader.loaded{opacity:0;visibility:hidden;pointer-events:none}
+.loader-content{display:flex;flex-direction:column;align-items:center;gap:16px;text-align:center;padding:24px}
+.loader-mark{width:76px;height:auto;display:block;filter:drop-shadow(0 8px 20px rgba(224,96,126,.3))}
+.loader-logo{width:min(320px,82vw);height:auto;display:block;filter:drop-shadow(0 6px 16px rgba(46,26,18,.12))}
+.loader-bar-wrap{width:180px;height:4px;background:var(--line);border-radius:99px;overflow:hidden;margin-top:8px}
+.loader-bar{height:100%;width:0%;background:linear-gradient(90deg,var(--pink),var(--brown));border-radius:99px}
+.loader-text{font-size:.8rem;font-weight:700;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-top:2px}
+
+.nav-official-logo{height:36px;width:auto;display:block;object-fit:contain;transition:transform .2s}
+.nav-official-logo:hover{transform:scale(1.04)}
+.foot-official-logo{height:40px;width:auto;display:block;object-fit:contain}
+.hero-brand-wrap{margin-bottom:20px;display:inline-block}
+.hero-official-logo{height:60px;max-width:100%;width:auto;display:block;object-fit:contain;filter:drop-shadow(0 8px 20px rgba(224,96,126,.22))}
+.pitch-official-logo{height:46px;max-width:100%;width:auto;display:block;object-fit:contain;margin-bottom:14px}
+
+@media (max-width:720px){
+  .nav-official-logo{height:30px}
+  .hero-official-logo{height:44px}
+  .loader-mark{width:64px}
+  .loader-logo{width:240px}
+}
+
 </style>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
@@ -592,6 +617,21 @@ dialog.auth-modal::backdrop{background:rgba(29,19,16,.6);backdrop-filter:blur(6p
 <script src="js/supabase-client.js"></script>
 </head>
 <body>
+
+<!-- Fullscreen Official Brand Page Loader -->
+<div id="pageLoader" class="page-loader">
+  <div class="loader-content">
+    <div class="loader-mark-wrap">
+      <img src="mark.png" alt="Pink or Brown Mark" class="loader-mark">
+    </div>
+    <img src="logo.svg" alt="Pink or Brown" class="loader-logo">
+    <div class="loader-bar-wrap">
+      <div class="loader-bar" id="loaderBar"></div>
+    </div>
+    <span class="loader-text">Pink or Brown · Club</span>
+  </div>
+</div>
+
 <div id="gate" class="gate" hidden>
   <div class="card">
     <div id="gateIc" style="margin:0 auto 14px;width:110px"></div>
@@ -1100,6 +1140,9 @@ function viewHome(v, u){
   v.innerHTML = `
   <section class="front-hero">
     <div>
+      <div class="hero-brand-wrap">
+        <img src="logo.svg" alt="Pink or Brown Official" class="hero-official-logo">
+      </div>
       <h1>Celebrating boobs and the <span class="pk">amazing</span> <span class="bn">connections</span> they create</h1>
       <p class="sub">A movement that creates connection and raises awareness — all centered around celebrating women, all day, every day.</p>
       <div class="ctas"><a class="btn pink" href="#/s/challenge">POB Challenge</a>${u ? `<a class="btn" href="#/dashboard">Go to the club</a>` : `<a class="btn pink glow" href="#/register" data-open-register>Join the club</a>`}<a class="btn ghost" href="#/shop">Shop apparel</a></div>
@@ -1465,7 +1508,7 @@ function viewCheckout(v, u){
 /* =========================================================
    AUTH
    ========================================================= */
-const pitch = `<div class="pitch"><div style="display:flex;gap:10px;align-items:center">${ic('wordmark-sticker','','').replace('class="ic ','style="height:120px;width:auto" class="ic ')}${ic('p-b-heart','','').replace('class="ic ','style="height:90px;width:auto" class="ic ')}</div>
+const pitch = `<div class="pitch"><div><img src="logo.svg" alt="Pink or Brown" class="pitch-official-logo"></div>
   <h1>Share the snap. Climb the board.</h1>
   <p>Cover up with the official sticker, tag @pinkorbrown, and every post turns into points for merch and event tickets — while the whole club raises breast cancer awareness.</p>
   <ol class="steps"><li><b>1</b><span>Join and link your Instagram.</span></li><li><b>2</b><span>Post a Story or photo with the sticker and tag us.</span></li><li><b>3</b><span>Earn points, unlock badges, redeem rewards.</span></li></ol></div>`;
@@ -2315,8 +2358,8 @@ function viewProfile(v, u){
 /* =========================================================
    BOOT
    ========================================================= */
-$('#brandLink').innerHTML = ic('brand-sticker','logo');
-$('#footBrand').innerHTML = ic('brand-sticker','logo');
+$('#brandLink').innerHTML = '<img src="logo.svg" alt="Pink or Brown" class="nav-official-logo">';
+$('#footBrand').innerHTML = '<img src="logo.svg" alt="Pink or Brown" class="foot-official-logo">';
 $('#cartIc').innerHTML = ic('cart');
 $('#menuIc').innerHTML = ic('menu');
 $('#gateIc').innerHTML = ic('circular-mark','','').replace('class="ic ','style="width:110px;height:110px" class="ic ');
@@ -2338,6 +2381,60 @@ document.addEventListener('click', e => {
     return;
   }
 });
+
+
+// Page Loader GSAP Execution
+function runPageLoader(){
+  const loader = document.getElementById('pageLoader');
+  if(!loader) return;
+  const bar = document.getElementById('loaderBar');
+  const mark = document.querySelector('.loader-mark');
+  const logo = document.querySelector('.loader-logo');
+
+  if(window.gsap && !reduced()){
+    const tl = gsap.timeline();
+    tl.fromTo(mark, 
+        { scale: 0, rotate: -180, opacity: 0 }, 
+        { scale: 1, rotate: 0, opacity: 1, duration: 0.6, ease: 'back.out(1.8)' }
+      )
+      .fromTo(logo, 
+        { opacity: 0, y: 14, scale: 0.95 }, 
+        { opacity: 1, y: 0, scale: 1, duration: 0.45, ease: 'power2.out' }, 
+        '-=0.25'
+      )
+      .to(bar, 
+        { width: '100%', duration: 0.65, ease: 'power2.inOut' }, 
+        '-=0.3'
+      )
+      .to(mark, 
+        { scale: 1.12, rotate: 360, duration: 0.5, ease: 'power1.inOut' }, 
+        '-=0.15'
+      )
+      .to(loader, {
+        opacity: 0,
+        scale: 1.04,
+        duration: 0.45,
+        ease: 'power3.inOut',
+        onComplete: () => {
+          loader.classList.add('loaded');
+          loader.style.display = 'none';
+        }
+      });
+  } else {
+    setTimeout(() => {
+      if(loader){
+        loader.classList.add('loaded');
+        loader.style.display = 'none';
+      }
+    }, 700);
+  }
+}
+
+if (document.readyState === 'complete') {
+  runPageLoader();
+} else {
+  window.addEventListener('load', runPageLoader);
+}
 
 window.addEventListener('hashchange', route);
 route();
