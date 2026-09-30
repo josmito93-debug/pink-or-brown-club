@@ -3,13 +3,8 @@
 // Creates a Stripe Checkout Session with support for club points and discount codes
 // ==============================================================================
 
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+const Stripe = require('stripe');
 const { createClient } = require('@supabase/supabase-js');
-
-const supabase = createClient(
-  process.env.SUPABASE_URL || '',
-  process.env.SUPABASE_SERVICE_ROLE_KEY || ''
-);
 
 // Standard catalog prices for security validation
 const PRICES = {
@@ -27,6 +22,17 @@ module.exports = async (req, res) => {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method Not Allowed' });
   }
+
+  if (!process.env.STRIPE_SECRET_KEY) {
+    return res.status(500).json({
+      error: 'STRIPE_SECRET_KEY is not configured. Please add it to your Vercel Project Environment Variables.'
+    });
+  }
+
+  const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
+  const supabase = (process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY)
+    ? createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY)
+    : null;
 
   try {
     const { items, pointsUsed = 0, clubCode = null, customerEmail, userId } = req.body;
@@ -57,7 +63,7 @@ module.exports = async (req, res) => {
     let discountCents = 0;
     let redemptionId = null;
 
-    if (clubCode && userId) {
+    if (clubCode && userId && supabase) {
       const { data: redemption } = await supabase
         .from('redemptions')
         .select('*')
@@ -80,7 +86,7 @@ module.exports = async (req, res) => {
 
     // Verify points balance from Supabase if points used
     let validPointsUsed = 0;
-    if (pointsUsed > 0 && userId) {
+    if (pointsUsed > 0 && userId && supabase) {
       const { data: profile } = await supabase
         .from('profiles')
         .select('balance_points')
