@@ -4,6 +4,34 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Pink or Brown · Club</title>
+
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+
+<meta name="description" content="A movement that creates connection and raises awareness, celebrating all women and supporting Breast Cancer Awareness. Join the club, earn points, and unlock rewards.">
+
+<!-- OpenGraph / Facebook / WhatsApp -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://wwwpinkorbrowncom.vercel.app/">
+<meta property="og:title" content="Pink or Brown · Club">
+<meta property="og:description" content="Celebrating women and raising breast cancer awareness. Join the club, earn points on every snap, climb the leaderboard, and unlock free merch.">
+<meta property="og:image" content="https://wwwpinkorbrowncom.vercel.app/og-image.png">
+<meta property="og:image:secure_url" content="https://wwwpinkorbrowncom.vercel.app/og-image.png">
+<meta property="og:image:type" content="image/png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:site_name" content="Pink or Brown · Club">
+
+<!-- Twitter / X -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@PinkorBrown">
+<meta name="twitter:creator" content="@PinkorBrown">
+<meta name="twitter:title" content="Pink or Brown · Club">
+<meta name="twitter:description" content="Celebrating women and raising breast cancer awareness. Join the club, earn points on every snap, climb the leaderboard, and unlock free merch.">
+<meta name="twitter:image" content="https://wwwpinkorbrowncom.vercel.app/og-image.png">
+<meta name="theme-color" content="#E0607E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -587,29 +615,32 @@ dialog.auth-modal::backdrop{background:rgba(29,19,16,.6);backdrop-filter:blur(6p
 
 
 /* ===== Page Loader & Official Transparent Logos ===== */
-.page-loader{position:fixed;inset:0;background:var(--bg);z-index:99999;display:flex;align-items:center;justify-content:center;transition:opacity .5s cubic-bezier(.4,0,.2,1), visibility .5s}
+.page-loader{position:fixed;inset:0;background:#1D1310;z-index:99999;display:flex;align-items:center;justify-content:center;transition:opacity .5s cubic-bezier(.4,0,.2,1), visibility .5s}
 .page-loader.loaded{opacity:0;visibility:hidden;pointer-events:none}
-.loader-content{display:flex;flex-direction:column;align-items:center;gap:16px;text-align:center;padding:24px}
-.loader-mark{width:76px;height:auto;display:block;filter:drop-shadow(0 8px 20px rgba(224,96,126,.3))}
-.loader-logo{width:min(320px,82vw);height:auto;display:block;filter:drop-shadow(0 6px 16px rgba(46,26,18,.12))}
-.loader-bar-wrap{width:180px;height:4px;background:var(--line);border-radius:99px;overflow:hidden;margin-top:8px}
-.loader-bar{height:100%;width:0%;background:linear-gradient(90deg,var(--pink),var(--brown));border-radius:99px}
-.loader-text{font-size:.8rem;font-weight:700;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-top:2px}
+.loader-content{display:flex;flex-direction:column;align-items:center;gap:18px;text-align:center;padding:24px}
+.loader-logo{width:min(340px,85vw);height:auto;display:block;filter:drop-shadow(0 8px 24px rgba(255,96,153,.25))}
+.loader-bar-wrap{width:200px;height:4px;background:rgba(255,255,255,.15);border-radius:99px;overflow:hidden;margin-top:6px}
+.loader-bar{height:100%;width:0%;background:linear-gradient(90deg,#FF6099,#93624A);border-radius:99px}
+.loader-text{font-size:.82rem;font-weight:700;color:#C2A69C;letter-spacing:.08em;text-transform:uppercase}
 
-.nav-official-logo{height:36px;width:auto;display:block;object-fit:contain;transition:transform .2s}
-.nav-official-logo:hover{transform:scale(1.04)}
-.foot-official-logo{height:40px;width:auto;display:block;object-fit:contain}
-.hero-brand-wrap{margin-bottom:20px;display:inline-block}
-.hero-official-logo{height:60px;max-width:100%;width:auto;display:block;object-fit:contain;filter:drop-shadow(0 8px 20px rgba(224,96,126,.22))}
-.pitch-official-logo{height:46px;max-width:100%;width:auto;display:block;object-fit:contain;margin-bottom:14px}
+.hero-brand-wrap{margin-bottom:22px;display:inline-block}
+.hero-logo-pill{background:#1D1310;padding:12px 28px;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;box-shadow:0 12px 32px rgba(29,19,16,.28);border:1px solid rgba(255,255,255,.12);transition:transform .2s, box-shadow .2s}
+.hero-logo-pill:hover{transform:translateY(-2px);box-shadow:0 16px 40px rgba(255,96,153,.25)}
+.hero-official-logo{height:52px;max-width:100%;width:auto;display:block}
+
+.nav-brand-pill{background:#1D1310;padding:7px 18px;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;box-shadow:0 4px 14px rgba(29,19,16,.2);border:1px solid rgba(255,255,255,.08);transition:transform .15s}
+.nav-brand-pill:hover{transform:scale(1.03)}
+.nav-official-logo{height:28px;width:auto;display:block}
+.foot-official-logo{height:32px;width:auto;display:block}
+.pitch-official-logo{height:46px;max-width:100%;width:auto;display:block}
 
 @media (max-width:720px){
-  .nav-official-logo{height:30px}
-  .hero-official-logo{height:44px}
-  .loader-mark{width:64px}
-  .loader-logo{width:240px}
+  .hero-official-logo{height:38px}
+  .hero-logo-pill{padding:9px 20px}
+  .nav-official-logo{height:24px}
+  .nav-brand-pill{padding:5px 14px}
+  .loader-logo{width:260px}
 }
-
 </style>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
@@ -621,10 +652,7 @@ dialog.auth-modal::backdrop{background:rgba(29,19,16,.6);backdrop-filter:blur(6p
 <!-- Fullscreen Official Brand Page Loader -->
 <div id="pageLoader" class="page-loader">
   <div class="loader-content">
-    <div class="loader-mark-wrap">
-      <img src="mark.png" alt="Pink or Brown Mark" class="loader-mark">
-    </div>
-    <img src="logo.svg" alt="Pink or Brown" class="loader-logo">
+    <img src="logo-white.svg" alt="Pink or Brown" class="loader-logo">
     <div class="loader-bar-wrap">
       <div class="loader-bar" id="loaderBar"></div>
     </div>
@@ -1141,7 +1169,9 @@ function viewHome(v, u){
   <section class="front-hero">
     <div>
       <div class="hero-brand-wrap">
-        <img src="logo.svg" alt="Pink or Brown Official" class="hero-official-logo">
+        <div class="hero-logo-pill">
+          <img src="logo-white.svg" alt="Pink or Brown Official" class="hero-official-logo">
+        </div>
       </div>
       <h1>Celebrating boobs and the <span class="pk">amazing</span> <span class="bn">connections</span> they create</h1>
       <p class="sub">A movement that creates connection and raises awareness — all centered around celebrating women, all day, every day.</p>
@@ -1508,7 +1538,7 @@ function viewCheckout(v, u){
 /* =========================================================
    AUTH
    ========================================================= */
-const pitch = `<div class="pitch"><div><img src="logo.svg" alt="Pink or Brown" class="pitch-official-logo"></div>
+const pitch = `<div class="pitch"><div style="margin-bottom:14px"><span class="nav-brand-pill" style="padding:10px 22px;display:inline-flex"><img src="logo-white.svg" alt="Pink or Brown" style="height:36px;width:auto"></span></div>
   <h1>Share the snap. Climb the board.</h1>
   <p>Cover up with the official sticker, tag @pinkorbrown, and every post turns into points for merch and event tickets — while the whole club raises breast cancer awareness.</p>
   <ol class="steps"><li><b>1</b><span>Join and link your Instagram.</span></li><li><b>2</b><span>Post a Story or photo with the sticker and tag us.</span></li><li><b>3</b><span>Earn points, unlock badges, redeem rewards.</span></li></ol></div>`;
@@ -2358,8 +2388,8 @@ function viewProfile(v, u){
 /* =========================================================
    BOOT
    ========================================================= */
-$('#brandLink').innerHTML = '<img src="logo.svg" alt="Pink or Brown" class="nav-official-logo">';
-$('#footBrand').innerHTML = '<img src="logo.svg" alt="Pink or Brown" class="foot-official-logo">';
+$('#brandLink').innerHTML = '<span class="nav-brand-pill"><img src="logo-white.svg" alt="Pink or Brown" class="nav-official-logo"></span>';
+$('#footBrand').innerHTML = '<span class="nav-brand-pill"><img src="logo-white.svg" alt="Pink or Brown" class="foot-official-logo"></span>';
 $('#cartIc').innerHTML = ic('cart');
 $('#menuIc').innerHTML = ic('menu');
 $('#gateIc').innerHTML = ic('circular-mark','','').replace('class="ic ','style="width:110px;height:110px" class="ic ');
@@ -2388,38 +2418,28 @@ function runPageLoader(){
   const loader = document.getElementById('pageLoader');
   if(!loader) return;
   const bar = document.getElementById('loaderBar');
-  const mark = document.querySelector('.loader-mark');
   const logo = document.querySelector('.loader-logo');
 
   if(window.gsap && !reduced()){
     const tl = gsap.timeline();
-    tl.fromTo(mark, 
-        { scale: 0, rotate: -180, opacity: 0 }, 
-        { scale: 1, rotate: 0, opacity: 1, duration: 0.6, ease: 'back.out(1.8)' }
-      )
-      .fromTo(logo, 
-        { opacity: 0, y: 14, scale: 0.95 }, 
-        { opacity: 1, y: 0, scale: 1, duration: 0.45, ease: 'power2.out' }, 
-        '-=0.25'
+    tl.fromTo(logo, 
+        { scale: 0.85, opacity: 0, y: 15 }, 
+        { scale: 1, opacity: 1, y: 0, duration: 0.6, ease: 'back.out(1.6)' }
       )
       .to(bar, 
         { width: '100%', duration: 0.65, ease: 'power2.inOut' }, 
-        '-=0.3'
-      )
-      .to(mark, 
-        { scale: 1.12, rotate: 360, duration: 0.5, ease: 'power1.inOut' }, 
-        '-=0.15'
+        '-=0.2'
       )
       .to(loader, {
         opacity: 0,
-        scale: 1.04,
+        scale: 1.03,
         duration: 0.45,
         ease: 'power3.inOut',
         onComplete: () => {
           loader.classList.add('loaded');
           loader.style.display = 'none';
         }
-      });
+      }, '+=0.1');
   } else {
     setTimeout(() => {
       if(loader){
@@ -2429,7 +2449,6 @@ function runPageLoader(){
     }, 700);
   }
 }
-
 if (document.readyState === 'complete') {
   runPageLoader();
 } else {

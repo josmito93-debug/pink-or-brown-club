@@ -1,10 +1,7 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Pink or Brown · Sign In</title>
+const fs = require('fs');
+const path = require('path');
 
+const metaTags = `
 <link rel="icon" type="image/x-icon" href="/favicon.ico">
 <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
@@ -31,12 +28,30 @@
 <meta name="twitter:title" content="Pink or Brown · Club">
 <meta name="twitter:description" content="Celebrating women and raising breast cancer awareness. Join the club, earn points on every snap, climb the leaderboard, and unlock free merch.">
 <meta name="twitter:image" content="https://wwwpinkorbrowncom.vercel.app/og-image.png">
-<meta name="theme-color" content="#E0607E">
-<script>
-window.location.replace('/#/login');
-</script>
-</head>
-<body style="font-family:sans-serif;background:#FCEFF2;display:grid;place-content:center;height:100vh;margin:0;color:#2E1A12">
-<p>Loading Pink or Brown · Sign In…</p>
-</body>
-</html>
+<meta name="theme-color" content="#E0607E">`;
+
+const files = [
+  'index.html',
+  'club.html',
+  'Pink or Brown · Club.html',
+  'register.html',
+  'login.html'
+];
+
+files.forEach(file => {
+  const filePath = path.join(__dirname, '..', file);
+  if (!fs.existsSync(filePath)) return;
+  let content = fs.readFileSync(filePath, 'utf8');
+
+  // Remove existing og or favicon if any
+  content = content.replace(/<link rel="(icon|shortcut icon|apple-touch-icon)"[^>]*>/gi, '');
+  content = content.replace(/<meta property="og:[^>]*>/gi, '');
+  content = content.replace(/<meta name="twitter:[^>]*>/gi, '');
+  content = content.replace(/<meta name="theme-color"[^>]*>/gi, '');
+
+  // Insert right after <title>...</title>
+  content = content.replace(/(<title>[^<]*<\/title>)/i, `$1\n${metaTags}`);
+
+  fs.writeFileSync(filePath, content, 'utf8');
+  console.log(`✓ Injected favicon & OpenGraph meta tags into ${file}`);
+});
