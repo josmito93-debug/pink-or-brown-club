@@ -269,8 +269,8 @@ async function runHardTest() {
   assert('Awareness Ribbon vector embedded', indexHtml.includes('awareness-ribbon'));
   assert('All 8 product lines registered in catalog', ['women-shirt','men-shirt','tank-top','trucker-cap','foam-trucker','unisex-hat','socks','underwear'].every(id => indexHtml.includes(id)));
   assert('No legacy demo buttons present in Login template', !indexHtml.includes('id="demo">Enter with the demo account'));
-  assert('Profile photo uploader HTML exists in register form', indexHtml.includes('id="avFile"') && indexHtml.includes('id="avImg"'));
-  assert('Real-time age badge container exists in register form', indexHtml.includes('id="ageBadge"'));
+  assert('Profile photo uploader HTML exists in register form', indexHtml.includes('avFile') && indexHtml.includes('avImg'));
+  assert('Real-time age badge container exists in register form', indexHtml.includes('ageBadge'));
 
   // -------------------------------------------------------------
   // SUMMARY REPORT

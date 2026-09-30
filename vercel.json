@@ -2,9 +2,66 @@
   "version": 2,
   "cleanUrls": true,
   "rewrites": [
-    { "source": "/club", "destination": "/index.html" },
-    { "source": "/club.html", "destination": "/index.html" },
-    { "source": "/Pink%20or%20Brown%20%C2%B7%20Club.html", "destination": "/index.html" }
+    {
+      "source": "/register",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/login",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/forgot",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/dashboard",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/leaderboard",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/rewards",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/messages",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/profile",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/shop",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/community",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/checkout",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/product/(.*)",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/club",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/club.html",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/Pink%20or%20Brown%20%C2%B7%20Club.html",
+      "destination": "/index.html"
+    }
   ],
   "headers": [
     {
