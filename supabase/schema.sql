@@ -189,6 +189,7 @@ declare
   user_dob date;
   user_ref text;
   ref_user_id uuid;
+  user_avatar text;
 begin
   raw_meta := new.raw_user_meta_data;
   user_name := coalesce(raw_meta->>'name', 'Member');
@@ -196,9 +197,10 @@ begin
   user_team := coalesce(raw_meta->>'team', 'pink');
   user_dob := coalesce((raw_meta->>'dob')::date, '2000-01-01'::date);
   user_ref := lower(raw_meta->>'referral');
+  user_avatar := raw_meta->>'avatar_url';
 
   -- Insert profile
-  insert into public.profiles (id, name, handle, email, team, dob, ig_code)
+  insert into public.profiles (id, name, handle, email, team, dob, ig_code, avatar_url)
   values (
     new.id,
     user_name,
@@ -206,7 +208,8 @@ begin
     new.email,
     user_team,
     user_dob,
-    'POB-' || upper(substr(md5(random()::text), 1, 4))
+    'POB-' || upper(substr(md5(random()::text), 1, 4)),
+    user_avatar
   );
 
   -- Award 100 welcome points

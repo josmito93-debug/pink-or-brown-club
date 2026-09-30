@@ -24,13 +24,13 @@ window.POB_BACKEND = {
   isLive: () => !!sb,
 
   // --- AUTHENTICATION ---
-  async signUp({ email, password, name, handle, team, dob, referral }) {
+  async signUp({ email, password, name, handle, team, dob, referral, avatar_url }) {
     if (!sb) return null;
     const { data, error } = await sb.auth.signUp({
       email,
       password,
       options: {
-        data: { name, handle, team, dob, referral }
+        data: { name, handle, team, dob, referral, avatar_url }
       }
     });
     if (error) throw error;

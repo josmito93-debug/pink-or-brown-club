@@ -536,6 +536,36 @@ a.lk:hover .art{outline:2px solid var(--ink)}
 @media (prefers-reduced-motion:reduce){.glow,.glow::after,.badge.on,.badge.on .ic,.badge.on b,.pill-pts,.unlock,.unlock .ic{animation:none!important}.floatpts,.confetti{display:none}}
 
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+/* ===== Enhanced Production Auth & Profile Styling ===== */
+.av.has-img{overflow:hidden;background:var(--tile);border:2px solid var(--line)}
+.av .av-img{width:100%;height:100%;object-fit:cover;border-radius:50%;display:block}
+.avatar-picker{display:flex;align-items:center;gap:18px;margin-bottom:18px;padding:16px;background:var(--bg);border-radius:18px;border:1.5px dashed var(--line);transition:border-color .2s}
+.avatar-picker:hover{border-color:var(--pink)}
+.avatar-preview{position:relative;width:76px;height:76px;border-radius:50%;background:var(--surface);border:2px solid var(--pink);overflow:hidden;display:grid;place-content:center;flex:none;cursor:pointer;box-shadow:0 4px 12px rgba(224,96,126,.2)}
+.avatar-preview img{width:100%;height:100%;object-fit:cover;display:block}
+.avatar-preview .cam-icon{position:absolute;inset:0;background:rgba(30,15,10,.5);display:grid;place-content:center;color:#fff;opacity:0;transition:opacity .2s;font-size:1.1rem}
+.avatar-preview:hover .cam-icon{opacity:1}
+.avatar-actions{display:flex;flex-direction:column;gap:6px}
+.avatar-actions b{font-size:.94rem}
+.avatar-actions p{font-size:.8rem;color:var(--muted)}
+.avatar-btn{background:var(--surface);border:1.5px solid var(--line);border-radius:999px;padding:6px 14px;font-size:.82rem;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:6px;width:fit-content;transition:all .2s}
+.avatar-btn:hover{background:var(--pink-soft);border-color:var(--pink);color:var(--ink)}
+.age-badge{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;font-size:.78rem;font-weight:700;margin-top:6px;width:fit-content}
+.age-badge.valid{background:color-mix(in srgb,var(--ok) 18%,transparent);color:var(--ok)}
+.age-badge.invalid{background:color-mix(in srgb,var(--pink) 18%,transparent);color:var(--pink)}
+.pw-wrap{position:relative}
+.pw-wrap input{padding-right:48px}
+.pw-toggle{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:0;cursor:pointer;color:var(--muted);font-size:.85rem;font-weight:600;padding:6px}
+.pw-toggle:hover{color:var(--ink)}
+.team-cards{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.team-card{display:flex;flex-direction:column;gap:6px;padding:14px;border:2px solid var(--line);border-radius:16px;cursor:pointer;background:var(--surface);transition:border-color .2s, transform .15s}
+.team-card:hover{transform:translateY(-2px)}
+.team-card.selected.tp{border-color:var(--pink);background:color-mix(in srgb,var(--pink) 10%,transparent)}
+.team-card.selected.tb{border-color:var(--brown);background:color-mix(in srgb,var(--brown) 10%,transparent)}
+.team-card-top{display:flex;align-items:center;gap:8px;font-weight:700;font-size:.95rem}
+.team-card small{color:var(--muted);font-size:.8rem}
+
 </style>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
@@ -760,7 +790,7 @@ async function hash(pw, salt){
   catch(e){ let h = 0; for(const c of salt+pw) h = (h*31 + c.charCodeAt(0)) | 0; return 'x'+h; }
 }
 const ageOf = iso => { const b = new Date(iso), n = new Date(); let a = n.getFullYear() - b.getFullYear(); const m = n.getMonth() - b.getMonth(); if(m < 0 || (m === 0 && n.getDate() < b.getDate())) a--; return a; };
-function newUser(o){ return Object.assign({id:uid(), createdAt:Date.now(), lifetime:0, balance:0, igLinked:false, igCode:null, badges:[], log:[], subs:[], redemptions:[], chats:null, blocked:[], liked:[]}, o); }
+function newUser(o){ return Object.assign({id:uid(), createdAt:Date.now(), lifetime:0, balance:0, igLinked:false, igCode:null, badges:[], log:[], subs:[], redemptions:[], chats:null, blocked:[], liked:[], avatar_url:null, bio:''}, o); }
 function claimPending(u){
   const p = store.get('pendingPts', null);
   if(p && p.pts > 0){ award(u, 'purchase', {pts:p.pts, note:'Order ' + p.order}); store.del('pendingPts'); return p.pts; }
@@ -836,7 +866,9 @@ function modal(html, cls = ''){
 }
 const avColor = team => team === 'pink' ? 'var(--pink)' : 'var(--brown)';
 const initials = n => n.split(/\s+/).map(p => p[0]).slice(0,2).join('').toUpperCase();
-const avatar = (m, lg) => `<span class="av${lg?' lg':''}" style="background:${avColor(m.team)}">${esc(initials(m.name))}</span>`;
+const avatar = (m, lg) => (m && m.avatar_url)
+  ? `<span class="av${lg?' lg':''} has-img"><img src="${esc(m.avatar_url)}" alt="${esc(m.name)}" class="av-img"></span>`
+  : `<span class="av${lg?' lg':''}" style="background:${avColor(m?.team || 'pink')}">${esc(initials(m?.name || 'Member'))}</span>`;
 
 /* ---------- Join the club popups ---------- */
 const JOIN_COPY = {
@@ -1409,115 +1441,296 @@ const pitch = `<div class="pitch"><div style="display:flex;gap:10px;align-items:
 function afterAuth(){ const to = store.get('afterLogin', 'dashboard'); store.del('afterLogin'); location.hash = '#/' + to; }
 function viewLogin(v){
   v.innerHTML = `<section class="auth">${pitch}
-    <div class="card"><h2 style="margin-bottom:6px">Welcome back</h2><p class="hint" style="margin-bottom:20px">Log in to see your points and rank.</p>
+    <div class="card" style="box-shadow:0 12px 36px rgba(46,26,18,.08)"><h2 style="margin-bottom:6px">Sign in to your account</h2>
+      <p class="hint" style="margin-bottom:20px">Access your club points, rewards, messages and monthly challenges.</p>
       <form id="f" novalidate><div id="e"></div>
-        <div class="field"><label for="em">Email</label><input id="em" type="email" autocomplete="email" required></div>
-        <div class="field"><label for="pw">Password</label><input id="pw" type="password" autocomplete="current-password" required></div>
-        <button class="btn block" type="submit">Log in</button></form>
-      <button class="btn block ghost" id="demo" style="margin-top:10px">Enter with the demo account</button>
-      <p class="alt"><a href="#/forgot">Forgot password?</a> · New here? <a href="#/register">Join the club</a></p></div></section>`;
-  $('#demo').onclick = demoLogin;
+        <div class="field"><label for="em">Email address</label><input id="em" type="email" placeholder="you@example.com" autocomplete="email" required></div>
+        <div class="field"><label for="pw">Password</label>
+          <div class="pw-wrap"><input id="pw" type="password" placeholder="Enter your password" autocomplete="current-password" required>
+            <button type="button" class="pw-toggle" id="pwTog" aria-label="Show password">Show</button></div></div>
+        <button class="btn block pink glow" type="submit" style="margin-top:10px">Sign In</button></form>
+      <p class="alt"><a href="#/forgot">Forgot password?</a> · Don't have an account? <a href="#/register"><b>Join the club</b></a></p></div></section>`;
+
+  const pwInput = $('#pw');
+  const pwTog = $('#pwTog');
+  if(pwTog && pwInput){
+    pwTog.onclick = () => {
+      const isText = pwInput.type === 'text';
+      pwInput.type = isText ? 'password' : 'text';
+      pwTog.textContent = isText ? 'Show' : 'Hide';
+    };
+  }
+
   $('#f').onsubmit = async e => {
     e.preventDefault();
     const em = $('#em').value.trim().toLowerCase(), pw = $('#pw').value;
+    if(!em || !pw){
+      $('#e').innerHTML = '<div class="err">Please enter both your email and password.</div>';
+      return;
+    }
+    const btn = $('#f button[type=submit]');
+    if(btn){ btn.disabled = true; btn.textContent = 'Signing in…'; }
+
     if(window.POB_BACKEND?.isLive()){
       try {
         const res = await window.POB_BACKEND.signIn({ email: em, password: pw });
         if(res && res.user){
           let u = users().find(x => x.id === res.user.id || x.email === em);
           if(!u){
-            u = newUser({id: res.user.id, name: res.user.user_metadata?.name || 'Member', handle: res.user.user_metadata?.handle || 'member', email: em, team: res.user.user_metadata?.team || 'pink', dob: res.user.user_metadata?.dob || '2000-01-01', lifetime: 100, balance: 100});
+            const prof = await window.POB_BACKEND.getCurrentUser().catch(() => null);
+            u = newUser({
+              id: res.user.id,
+              name: prof?.name || res.user.user_metadata?.name || 'Member',
+              handle: prof?.handle || res.user.user_metadata?.handle || 'member',
+              email: em,
+              team: prof?.team || res.user.user_metadata?.team || 'pink',
+              dob: prof?.dob || res.user.user_metadata?.dob || '2000-01-01',
+              avatar_url: prof?.avatar_url || res.user.user_metadata?.avatar_url || null,
+              lifetime: prof?.lifetime_points || 100,
+              balance: prof?.balance_points || 100
+            });
             const list = users(); list.push(u); saveUsers(list);
           }
           store.set('session', {uid:u.id, at:Date.now()});
-          toast('Logged in with Supabase'); afterAuth(); return;
+          toast('Welcome back, ' + u.name.split(' ')[0]);
+          afterAuth();
+          return;
         }
       } catch(err){
-        console.warn('Supabase auth notice:', err.message);
+        console.warn('Supabase auth check:', err.message);
+        $('#e').innerHTML = `<div class="err">${esc(err.message || "Invalid login credentials.")}</div>`;
+        if(btn){ btn.disabled = false; btn.textContent = 'Sign In'; }
+        return;
       }
     }
     const u = users().find(x => x.email === em);
-    if(!u || u.pass !== await hash(pw, u.salt)){ $('#e').innerHTML = `<div class="err">That email and password don't match. Check both and try again.</div>`; return; }
+    if(!u || u.pass !== await hash(pw, u.salt)){
+      $('#e').innerHTML = `<div class="err">That email and password don't match. Check both and try again.</div>`;
+      if(btn){ btn.disabled = false; btn.textContent = 'Sign In'; }
+      return;
+    }
     store.set('session', {uid:u.id, at:Date.now()});
     const got = claimPending(u); if(got) saveMe(u);
-    toast(got ? `Logged in · +${got} points from your order` : 'Logged in'); afterAuth();
+    toast(got ? `Logged in · +${got} points from your order` : 'Welcome back, ' + u.name.split(' ')[0]);
+    afterAuth();
   };
 }
-async function demoLogin(){
-  const list = users();
-  let u = list.find(x => x.email === 'demo@pinkorbrown.com');
-  if(!u){
-    const salt = uid() + uid();
-    u = newUser({name:'Demo Member', handle:'demo.pob', email:'demo@pinkorbrown.com', team:'pink', dob:'1995-05-05', salt, pass:await hash('pinkorbrown', salt), createdAt:Date.now() - 20*86400000, igLinked:true, igCode:'POB-DEMO'});
-    const day = 86400000;
-    [['signup',19],['link',19],['story',15],['post',12],['selfcheck',9],['story',6],['challenge',3],['post',1]].forEach(([t,d]) => { award(u, t); u.log[0].at = Date.now() - d*day; });
-    u.subs = [{id:uid(), type:'post', url:'https://www.instagram.com/p/demo', status:'pending', at:Date.now() - 3600000},{id:uid(), type:'story', url:'', status:'approved', at:Date.now() - 6*day}];
-    list.push(u); saveUsers(list);
-  }
-  store.set('session', {uid:u.id, at:Date.now()});
-  toast('Logged in as the demo member'); afterAuth();
-}
 function viewForgot(v){
-  v.innerHTML = `<section class="auth">${pitch}<div class="card"><h2 style="margin-bottom:6px">Reset your password</h2>
-    <p class="hint" style="margin-bottom:20px">We'll email you a link to set a new one.</p>
-    <form id="f"><div class="field"><label for="em">Email</label><input id="em" type="email" required></div><button class="btn block">Send reset link</button></form>
-    <p class="demo" style="margin-top:14px">In production Supabase Auth sends this email.</p><p class="alt"><a href="#/login">Back to log in</a></p></div></section>`;
-  $('#f').onsubmit = e => { e.preventDefault(); toast('Reset link sent — check your inbox'); location.hash = '#/login'; };
+  v.innerHTML = `<section class="auth">${pitch}<div class="card" style="box-shadow:0 12px 36px rgba(46,26,18,.08)"><h2 style="margin-bottom:6px">Reset your password</h2>
+    <p class="hint" style="margin-bottom:20px">Enter your email and we'll send you instructions to set a new password.</p>
+    <form id="f"><div class="field"><label for="em">Email address</label><input id="em" type="email" placeholder="you@example.com" required></div><button class="btn block pink glow">Send reset link</button></form>
+    <p class="alt"><a href="#/login">Back to Sign In</a></p></div></section>`;
+  $('#f').onsubmit = e => { e.preventDefault(); toast('Password reset link sent — please check your inbox'); location.hash = '#/login'; };
 }
 function viewRegister(v){
-  const pre = store.get('prefill', ''); const pend = store.get('pendingPts', null);
+  const pre = store.get('prefill', '');
+  const pend = store.get('pendingPts', null);
+  let selectedAvatar = null;
+  let selectedTeam = 'pink';
+
   v.innerHTML = `<section class="auth">${pitch}
-    <div class="card"><h2 style="margin-bottom:6px">Join the club</h2><p class="hint" style="margin-bottom:20px">100 welcome points${pend?` + ${fmt(pend.pts)} from your order`:''} as soon as you join.</p>
+    <div class="card" style="box-shadow:0 12px 36px rgba(46,26,18,.08)"><h2 style="margin-bottom:6px">Join Pink or Brown · Club</h2>
+      <p class="hint" style="margin-bottom:20px"><b>100 welcome points</b>${pend?` + ${fmt(pend.pts)} from your order`:''} awarded instantly.</p>
+      
       <form id="f" novalidate><div id="e"></div>
-        <div class="row2"><div class="field"><label for="nm">Name</label><input id="nm" type="text" autocomplete="name" required></div>
-          <div class="field"><label for="ig">Instagram handle</label><input id="ig" type="text" placeholder="yourhandle" autocomplete="off" required></div></div>
-        <div class="field"><label for="em">Email</label><input id="em" type="email" autocomplete="email" value="${esc(pre)}" required></div>
-        <div class="row2"><div class="field"><label for="pw">Password</label><input id="pw" type="password" autocomplete="new-password" minlength="8" required><span class="hint">At least 8 characters</span></div>
-          <div class="field"><label for="dob">Date of birth</label><input id="dob" type="date" required><span class="hint">You must be 18+</span></div></div>
-        <div class="field"><label>Pick your team</label><div class="team">
-            <label><input type="radio" name="team" value="pink" checked><span class="dot p"></span>Team Pink</label>
-            <label><input type="radio" name="team" value="brown"><span class="dot b"></span>Team Brown</label></div></div>
-        <div class="field"><label for="ref">Referral code <span class="hint">(optional)</span></label><input id="ref" type="text" placeholder="A friend's handle"></div>
-        <label class="check"><input type="checkbox" id="tos"> <span>I'm 18 or older, I accept the terms and community rules, and I agree that posts I tag may be reviewed before points are awarded.</span></label>
-        <button class="btn block pink glow" type="submit">Create account</button></form>
-      <p class="alt">Already a member? <a href="#/login">Log in</a></p></div></section>`;
+
+        <!-- Profile Photo Uploader -->
+        <div class="avatar-picker">
+          <label class="avatar-preview" for="avFile" title="Click to upload profile photo">
+            <img id="avImg" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='50' fill='%23F9D3DC'/%3E%3Ctext x='50' y='58' font-size='32' text-anchor='middle' fill='%23E0607E'%3E📷%3C/text%3E%3C/svg%3E" alt="Avatar Preview">
+            <span class="cam-icon">✎</span>
+          </label>
+          <div class="avatar-actions">
+            <b>Profile Photo <span class="hint">(optional)</span></b>
+            <p>Upload a photo or avatar for your club profile</p>
+            <label class="avatar-btn" for="avFile">
+              <span>Choose photo</span>
+              <input type="file" id="avFile" accept="image/*" style="display:none">
+            </label>
+          </div>
+        </div>
+
+        <div class="row2">
+          <div class="field"><label for="nm">Full Name</label><input id="nm" type="text" placeholder="Your name" autocomplete="name" required></div>
+          <div class="field"><label for="ig">Instagram Handle</label><input id="ig" type="text" placeholder="@yourhandle" autocomplete="off" required></div>
+        </div>
+
+        <div class="field"><label for="em">Email Address</label><input id="em" type="email" placeholder="you@example.com" autocomplete="email" value="${esc(pre)}" required></div>
+
+        <div class="row2">
+          <div class="field"><label for="pw">Password</label>
+            <div class="pw-wrap"><input id="pw" type="password" placeholder="At least 8 characters" autocomplete="new-password" minlength="8" required>
+              <button type="button" class="pw-toggle" id="pwTogReg">Show</button></div></div>
+          <div class="field"><label for="dob">Date of Birth</label>
+            <input id="dob" type="date" required>
+            <div id="ageBadge"></div>
+          </div>
+        </div>
+
+        <!-- Pick Your Team Cards -->
+        <div class="field" style="margin-top:4px"><label>Choose Your Team</label>
+          <div class="team-cards">
+            <div class="team-card selected tp" data-team="pink">
+              <div class="team-card-top"><span class="dot p"></span><span>Team Pink</span></div>
+              <small>Bold, vibrant & celebratory. Dedicated to joyful body positivity.</small>
+            </div>
+            <div class="team-card tb" data-team="brown">
+              <div class="team-card-top"><span class="dot b"></span><span>Team Brown</span></div>
+              <small>Warm, earthy & empowering. Rooted in community strength.</small>
+            </div>
+          </div>
+        </div>
+
+        <div class="field"><label for="ref">Referral Code <span class="hint">(optional)</span></label><input id="ref" type="text" placeholder="Friend's @handle"></div>
+
+        <label class="check"><input type="checkbox" id="tos"> <span>I confirm that I am 18 years of age or older, accept the terms and community rules, and support the cause.</span></label>
+        
+        <button class="btn block pink glow" type="submit" id="regBtn">Create Account & Claim 100 Pts</button>
+      </form>
+      <p class="alt">Already a member? <a href="#/login"><b>Sign In</b></a></p></div></section>`;
+
+  // Password toggle
+  const pwReg = $('#pw'), pwTogReg = $('#pwTogReg');
+  if(pwTogReg && pwReg){
+    pwTogReg.onclick = () => {
+      const isText = pwReg.type === 'text';
+      pwReg.type = isText ? 'password' : 'text';
+      pwTogReg.textContent = isText ? 'Show' : 'Hide';
+    };
+  }
+
+  // Live Age Calculation & Verification
+  const dobInput = $('#dob'), ageBadge = $('#ageBadge');
+  if(dobInput && ageBadge){
+    const updateAge = () => {
+      const val = dobInput.value;
+      if(!val){ ageBadge.innerHTML = ''; return; }
+      const age = ageOf(val);
+      if(age >= 18){
+        ageBadge.innerHTML = `<span class="age-badge valid">✓ ${age} years old · Verified 18+</span>`;
+      } else {
+        ageBadge.innerHTML = `<span class="age-badge invalid">✕ ${age} years old · Must be 18+ to join</span>`;
+      }
+    };
+    dobInput.onchange = updateAge;
+    dobInput.oninput = updateAge;
+  }
+
+  // Interactive Team Selection Cards
+  v.querySelectorAll('.team-card').forEach(card => {
+    card.onclick = () => {
+      v.querySelectorAll('.team-card').forEach(c => c.classList.remove('selected'));
+      card.classList.add('selected');
+      selectedTeam = card.dataset.team;
+    };
+  });
+
+  // Avatar Upload with Auto-Resize to lightweight WebP/JPEG dataURL
+  const fileInput = $('#avFile'), avImg = $('#avImg');
+  if(fileInput && avImg){
+    fileInput.onchange = e => {
+      const file = e.target.files?.[0];
+      if(!file) return;
+      const reader = new FileReader();
+      reader.onload = ev => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const size = 200;
+          canvas.width = size;
+          canvas.height = size;
+          const ctx = canvas.getContext('2d');
+          const minD = Math.min(img.width, img.height);
+          const sx = (img.width - minD)/2, sy = (img.height - minD)/2;
+          ctx.drawImage(img, sx, sy, minD, minD, 0, 0, size, size);
+          selectedAvatar = canvas.toDataURL('image/jpeg', 0.85);
+          avImg.src = selectedAvatar;
+          toast('Photo loaded!');
+        };
+        img.src = ev.target.result;
+      };
+      reader.readAsDataURL(file);
+    };
+  }
+
+  // Form Submission
   $('#f').onsubmit = async e => {
     e.preventDefault();
-    const name = $('#nm').value.trim(), handle = $('#ig').value.trim().replace(/^@/, '').toLowerCase(),
-          email = $('#em').value.trim().toLowerCase(), pw = $('#pw').value, dob = $('#dob').value,
-          team = document.querySelector('input[name=team]:checked').value, ref = $('#ref').value.trim().replace(/^@/, '').toLowerCase();
-    const list = users(); const errs = [];
-    if(!name) errs.push('Add your name.');
-    if(!/^[a-z0-9._]{2,30}$/.test(handle)) errs.push('Instagram handles use letters, numbers, dots and underscores only.');
-    if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) errs.push('Enter a valid email.');
-    else if(list.some(u => u.email === email)) errs.push('An account with this email exists. Log in instead.');
+    const name = $('#nm').value.trim(),
+          handle = $('#ig').value.trim().replace(/^@/, '').toLowerCase(),
+          email = $('#em').value.trim().toLowerCase(),
+          pw = $('#pw').value,
+          dob = $('#dob').value,
+          ref = $('#ref').value.trim().replace(/^@/, '').toLowerCase();
+
+    const list = users();
+    const errs = [];
+    if(!name) errs.push('Please enter your full name.');
+    if(!/^[a-z0-9._]{2,30}$/.test(handle)) errs.push('Instagram handle must use letters, numbers, dots and underscores only.');
+    if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) errs.push('Please enter a valid email address.');
+    else if(list.some(u => u.email === email)) errs.push('An account with this email already exists. Sign in instead.');
     if(list.some(u => u.handle === handle)) errs.push('That Instagram handle is already registered.');
-    if(pw.length < 8) errs.push('Use a password with at least 8 characters.');
-    if(!dob || ageOf(dob) < 18) errs.push('You must be 18 or older to join.');
-    if(!$('#tos').checked) errs.push('Accept the terms to continue.');
-    if(errs.length){ $('#e').innerHTML = `<div class="err">${errs.map(esc).join('<br>')}</div>`; $('#e').scrollIntoView({block:'center'}); return; }
+    if(pw.length < 8) errs.push('Password must be at least 8 characters long.');
+    if(!dob) errs.push('Please provide your date of birth.');
+    else if(ageOf(dob) < 18) errs.push('You must be 18 or older to join the Pink or Brown Club.');
+    if(!$('#tos').checked) errs.push('Please confirm you are 18 or older and accept the community rules.');
+
+    if(errs.length){
+      $('#e').innerHTML = `<div class="err">${errs.map(esc).join('<br>')}</div>`;
+      $('#e').scrollIntoView({behavior:'smooth', block:'center'});
+      return;
+    }
+
+    const regBtn = $('#regBtn');
+    if(regBtn){ regBtn.disabled = true; regBtn.textContent = 'Creating account…'; }
+
+    let supabaseUid = null;
     if(window.POB_BACKEND?.isLive()){
       try {
-        await window.POB_BACKEND.signUp({ email, password, name, handle, team, dob, referral: ref });
+        const sbRes = await window.POB_BACKEND.signUp({
+          email,
+          password: pw,
+          name,
+          handle,
+          team: selectedTeam,
+          dob,
+          referral: ref,
+          avatar_url: selectedAvatar
+        });
+        if(sbRes?.user) supabaseUid = sbRes.user.id;
       } catch(err){
         console.warn('Supabase signup notice:', err.message);
       }
     }
+
     const salt = uid() + uid();
-    const u = newUser({name, handle, email, team, dob, salt, pass:await hash(pw, salt)});
+    const u = newUser({
+      id: supabaseUid || uid(),
+      name,
+      handle,
+      email,
+      team: selectedTeam,
+      dob,
+      avatar_url: selectedAvatar,
+      salt,
+      pass: await hash(pw, salt)
+    });
+
     award(u, 'signup');
     const got = claimPending(u);
     const referrer = ref && list.find(x => x.handle === ref);
     if(referrer) award(referrer, 'referral', {note:'@'+handle});
-    list.push(u); saveUsers(list); store.del('prefill');
+
+    list.push(u);
+    saveUsers(list);
+    store.del('prefill');
     store.set('session', {uid:u.id, at:Date.now()});
-    toast(`Welcome to the club — +${100 + got} points`); afterAuth(); setTimeout(() => celebrateXY(innerWidth/2, innerHeight/3, 100 + got), 300);
+
+    toast(`Welcome to the club, ${name.split(' ')[0]}! +100 welcome points`);
+    afterAuth();
+    setTimeout(() => celebrateXY(innerWidth/2, innerHeight/3, 100 + got), 300);
   };
 }
-
-/* =========================================================
-   CLUB: DASHBOARD
-   ========================================================= */
 function ringSVG(pct){ const r = 88, c = 2*Math.PI*r, off = c*(1 - Math.min(1,pct));
   return `<svg viewBox="0 0 200 200" aria-hidden="true"><circle cx="100" cy="100" r="${r}" fill="none" stroke="var(--brown-soft)" stroke-width="16"/><circle cx="100" cy="100" r="${r}" fill="none" stroke="var(--pink)" stroke-width="16" stroke-linecap="round" stroke-dasharray="${c}" stroke-dashoffset="${off}"/></svg>`; }
 function rankOf(u){ const all = [...SEED.map(s => ({id:s.id, m:s.month})), ...users().map(x => ({id:x.id, m:monthPts(x)}))].sort((a,b) => b.m - a.m); return all.findIndex(x => x.id === u.id) + 1; }
@@ -1742,30 +1955,112 @@ function drawChat(){
    ========================================================= */
 function viewProfile(v, u){
   const orders = store.get('orders', []).filter(o => o.uid === u.id);
-  v.innerHTML = clubNav('profile') + `<h1 style="font-size:clamp(2rem,4vw,2.8rem);margin-bottom:22px">Profile</h1>
-    <div class="grid"><section class="card c6"><form id="pf">
-      <div class="field"><label for="nm">Name</label><input id="nm" type="text" value="${esc(u.name)}"></div>
-      <div class="field"><label>Email</label><input type="email" value="${esc(u.email)}" disabled></div>
-      <div class="field"><label>Instagram</label><input type="text" value="@${esc(u.handle)}" disabled><span class="hint">${u.igLinked?'Linked':'Not linked yet'}</span></div>
-      <div class="field"><label>Team</label><div class="team">
-        <label><input type="radio" name="team" value="pink" ${u.team==='pink'?'checked':''}><span class="dot p"></span>Team Pink</label>
-        <label><input type="radio" name="team" value="brown" ${u.team==='brown'?'checked':''}><span class="dot b"></span>Team Brown</label></div></div>
-      <button class="btn">Save changes</button></form></section>
-      <section class="card c6"><h2 style="margin-bottom:10px">Orders</h2>
-        ${orders.length ? `<ul class="list">${orders.map(o => `<li><b>${o.id}</b><span>${o.items.reduce((a,i)=>a+i.qty,0)} items · ${money(o.total)}</span><span class="when">${ago(o.at)}</span></li>`).join('')}</ul>` : '<p class="empty">No orders yet.</p>'}
-        <h2 style="margin:24px 0 10px">Account</h2><p class="hint" style="margin-bottom:14px">Member since ${new Date(u.createdAt).toLocaleDateString('en-US',{month:'long',year:'numeric'})}${u.blocked.length?` · ${u.blocked.length} blocked`:''}</p>
-        <div style="display:flex;gap:10px;flex-wrap:wrap">${u.blocked.length?'<button class="btn ghost" id="unb">Unblock all</button>':''}<button class="btn ghost" id="del" style="color:var(--pink)">Delete account</button></div>
-        <p class="demo" style="margin-top:14px">Prototype data lives only in this browser.</p></section></div>`;
+  const userAge = u.dob ? ageOf(u.dob) : null;
+  let newAvatarUrl = u.avatar_url || null;
+
+  v.innerHTML = clubNav('profile') + `<h1 style="font-size:clamp(2rem,4vw,2.8rem);margin-bottom:22px">Profile & Account</h1>
+    <div class="grid">
+      <section class="card c6">
+        <h2 style="margin-bottom:14px">Your Profile</h2>
+        <form id="pf">
+          <!-- Avatar section -->
+          <div class="avatar-picker" style="margin-bottom:20px">
+            <label class="avatar-preview" for="profAvFile">
+              <img id="profAvImg" src="${u.avatar_url || "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='50' fill='%23F9D3DC'/%3E%3Ctext x='50' y='58' font-size='32' text-anchor='middle' fill='%23E0607E'%3E📷%3C/text%3E%3C/svg%3E"}" alt="Profile avatar">
+              <span class="cam-icon">✎</span>
+            </label>
+            <div class="avatar-actions">
+              <b>Change Photo</b>
+              <p>JPG or PNG for your public member badge</p>
+              <label class="avatar-btn" for="profAvFile">
+                <span>Upload new photo</span>
+                <input type="file" id="profAvFile" accept="image/*" style="display:none">
+              </label>
+            </div>
+          </div>
+
+          <div class="field"><label for="nm">Display Name</label><input id="nm" type="text" value="${esc(u.name)}"></div>
+          <div class="field"><label>Email Address</label><input type="email" value="${esc(u.email)}" disabled><span class="hint">Managed via Supabase Auth</span></div>
+          <div class="row2">
+            <div class="field"><label>Instagram</label><input type="text" value="@${esc(u.handle)}" disabled><span class="hint">${u.igLinked?'✓ Verified & Linked':'Not linked yet'}</span></div>
+            <div class="field"><label>Age Verification</label><input type="text" value="${userAge ? userAge + ' years old · 18+ verified' : 'Verified 18+'}" disabled></div>
+          </div>
+          <div class="field"><label>Team</label>
+            <div class="team">
+              <label><input type="radio" name="team" value="pink" ${u.team==='pink'?'checked':''}><span class="dot p"></span>Team Pink</label>
+              <label><input type="radio" name="team" value="brown" ${u.team==='brown'?'checked':''}><span class="dot b"></span>Team Brown</label>
+            </div>
+          </div>
+          <button class="btn pink glow" type="submit" style="margin-top:10px">Save Changes</button>
+        </form>
+      </section>
+
+      <section class="card c6">
+        <h2 style="margin-bottom:10px">Order History</h2>
+        ${orders.length ? `<ul class="list">${orders.map(o => `<li><b>${o.id}</b><span>${o.items.reduce((a,i)=>a+i.qty,0)} items · ${money(o.total)}</span><span class="when">${ago(o.at)}</span></li>`).join('')}</ul>` : '<p class="empty">No store orders yet. Every purchase earns points toward free merchandise.</p>'}
+        <h2 style="margin:24px 0 10px">Membership Security</h2>
+        <p class="hint" style="margin-bottom:14px">Member since ${new Date(u.createdAt).toLocaleDateString('en-US',{month:'long',year:'numeric'})}${u.blocked.length?` · ${u.blocked.length} blocked`:''}</p>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          ${u.blocked.length?'<button class="btn ghost small" id="unb">Unblock all</button>':''}
+          <button class="btn ghost small" id="del" style="color:var(--pink)">Delete account</button>
+        </div>
+      </section>
+    </div>`;
+
   bindClubNav();
-  $('#pf').onsubmit = e => { e.preventDefault(); u.name = $('#nm').value.trim() || u.name; u.team = document.querySelector('input[name=team]:checked').value; saveMe(u); toast('Changes saved'); route(); };
-  const unb = $('#unb'); if(unb) unb.onclick = () => { u.blocked = []; saveMe(u); toast('Unblocked'); route(); };
+
+  // Photo upload handler in Profile
+  const pFile = $('#profAvFile'), pImg = $('#profAvImg');
+  if(pFile && pImg){
+    pFile.onchange = e => {
+      const file = e.target.files?.[0];
+      if(!file) return;
+      const reader = new FileReader();
+      reader.onload = ev => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const size = 200;
+          canvas.width = size; canvas.height = size;
+          const ctx = canvas.getContext('2d');
+          const minD = Math.min(img.width, img.height);
+          const sx = (img.width - minD)/2, sy = (img.height - minD)/2;
+          ctx.drawImage(img, sx, sy, minD, minD, 0, 0, size, size);
+          newAvatarUrl = canvas.toDataURL('image/jpeg', 0.85);
+          pImg.src = newAvatarUrl;
+          toast('Photo loaded — click Save Changes to apply');
+        };
+        img.src = ev.target.result;
+      };
+      reader.readAsDataURL(file);
+    };
+  }
+
+  $('#pf').onsubmit = e => {
+    e.preventDefault();
+    u.name = $('#nm').value.trim() || u.name;
+    u.team = document.querySelector('input[name=team]:checked').value;
+    if(newAvatarUrl) u.avatar_url = newAvatarUrl;
+    saveMe(u);
+    toast('Profile updated successfully');
+    route();
+  };
+
+  const unb = $('#unb');
+  if(unb) unb.onclick = () => { u.blocked = []; saveMe(u); toast('Unblocked'); route(); };
+
   $('#del').onclick = () => {
-    const d = modal(`<h2>Delete your account?</h2><p style="margin:12px 0 20px">Your points, badges, messages and codes are removed for good.</p>
+    const d = modal(`<h2>Delete your account?</h2><p style="margin:12px 0 20px">Your points, badges, messages and codes will be permanently removed.</p>
       <div style="display:flex;gap:10px"><button class="btn pink" id="yes">Delete account</button><button class="btn ghost" data-close>Cancel</button></div>`);
-    d.querySelector('#yes').onclick = () => { saveUsers(users().filter(x => x.id !== u.id)); store.del('session'); d.close(); toast('Account deleted'); location.hash = '#/'; };
+    d.querySelector('#yes').onclick = () => {
+      saveUsers(users().filter(x => x.id !== u.id));
+      store.del('session');
+      d.close();
+      toast('Account deleted');
+      location.hash = '#/';
+    };
   };
 }
-
 /* =========================================================
    BOOT
    ========================================================= */
